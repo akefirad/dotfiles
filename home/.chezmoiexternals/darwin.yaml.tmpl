@@ -1,0 +1,68 @@
+.config/zsh/ohmyzsh:
+  type: git-repo
+  url: https://github.com/ohmyzsh/ohmyzsh.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/themes/powerlevel10k:
+  type: git-repo
+  url: https://github.com/akefirad/powerlevel10k.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/zsh-autosuggestions:
+  type: git-repo
+  url: https://github.com/zsh-users/zsh-autosuggestions.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/fzf-tab:
+  type: git-repo
+  url: https://github.com/Aloxaf/fzf-tab.git
+  refreshPeriod: 168h
+
+# .config/ohmyzsh/custom/plugins/zsh-autocomplete:
+#   type: git-repo
+#   url: https://github.com/marlonrichert/zsh-autocomplete.git
+#   refreshPeriod: 168h
+
+# .config/ohmyzsh/custom/plugins/zsh-syntax-highlighting:
+#   type: git-repo
+#   url: https://github.com/zsh-users/zsh-syntax-highlighting.git
+#   refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/kubetail:
+  type: git-repo
+  url: https://github.com/johanhaleby/kubetail.git
+  refreshPeriod: 168h
+
+.local/bin/aws-sso:
+  type: file
+  url: https://github.com/synfinatic/aws-sso-cli/releases/download/v2.0.0-beta4/aws-sso-2.0.0-beta4-darwin-arm64
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/kubectl-133:
+  type: file
+  url: https://dl.k8s.io/release/v1.33.0/bin/darwin/arm64/kubectl
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/alf:
+  type: file
+  url: https://raw.githubusercontent.com/DannyBen/alf/refs/heads/master/alf
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/fx:
+  type: file
+  url: https://github.com/antonmedv/fx/releases/download/35.0.0/fx_darwin_arm64
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/k9s:
+  type: archive-file
+  url: https://github.com/derailed/k9s/releases/download/v0.50.6/k9s_Darwin_arm64.tar.gz
+  path: k9s
+
+.krew/krew:
+  type: archive-file
+  url: https://github.com/kubernetes-sigs/krew/releases/download/v0.4.5/krew-darwin_arm64.tar.gz
+  path: ./krew-darwin_arm64
