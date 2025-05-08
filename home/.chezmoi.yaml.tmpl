@@ -1,0 +1,41 @@
+sourceDir: ~/.dotfiles
+
+data:
+  osAct: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}Linux{{ end }}
+
+  versionAwsSso: 2.0.1
+  versionFzf: 0.64.0
+  versionGdu: 5.31.0
+  versionHelm: 3.18.4
+  versionKubectl133: 1.33.0
+  versionTerraform: 1.12.2
+
+  archiveNameGh: {{ if eq .chezmoi.os "darwin" }}macOS{{ else }}{{ .chezmoi.os }}{{ end }}_{{ .chezmoi.arch }}
+  versionGh: 2.74.2
+
+  archiveNameK6: {{ if eq .chezmoi.os "darwin" }}macos{{ else }}{{ .chezmoi.os }}{{ end }}-{{ .chezmoi.arch }}
+  versionK6: 1.1.0
+
+  archiveNameK9s: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}{{ .chezmoi.os }}{{ end }}_{{ .chezmoi.arch }}
+  versionK9s: 0.50.7
+
+  archiveNameZoxide: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-musl{{ end }}
+  versionZoxide: 0.9.8
+
+  archiveNameFd: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  versionFd: 10.2.0
+
+  archiveNameSd: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-musl{{ end }}
+  versionSd: 1.0.0
+
+  archiveNameRipgrep: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  versionRipgrep: 14.1.1
+
+  archiveNameUv: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  versionUv: 0.7.20
+
+  archiveNameBat: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  versionBat: 0.25.0
+
+  archiveNameJq: {{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}-{{ .chezmoi.arch }}
+  versionJq: 1.8.1
