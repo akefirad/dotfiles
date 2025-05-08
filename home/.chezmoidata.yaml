@@ -1,0 +1,62 @@
+---
+tools:
+  act:
+    repo: https://github.com/nektos/act
+    version: 0.2.79
+  awsSso:
+    repo: https://github.com/synfinatic/aws-sso-cli
+    version: 2.0.3
+  bat:
+    repo: https://github.com/sharkdp/bat
+    version: 0.25.0
+  cloudflared:
+    repo: https://github.com/cloudflare/cloudflared
+    version: 2025.8.0
+  fd:
+    repo: https://github.com/sharkdp/fd
+    version: 10.2.0
+  fx:
+    repo: https://github.com/antonmedv/fx
+    version: 37.0.0
+  fzf:
+    repo: https://github.com/junegunn/fzf
+    version: 0.64.0
+  gdu:
+    repo: https://github.com/dundee/gdu
+    version: 5.31.0
+  gh:
+    repo: https://github.com/cli/cli
+    version: 2.75.0
+  helm:
+    repo: https://github.com/helm/helm
+    version: 3.18.4
+  jq:
+    repo: https://github.com/jqlang/jq
+    version: jq-1.8.1
+  k6:
+    repo: https://github.com/grafana/k6
+    version: 1.1.0
+  k9s:
+    repo: https://github.com/derailed/k9s
+    version: 0.50.7
+  kubectl133:
+    repo: https://dl.k8s.io
+    version: 1.33.0
+  pack:
+    repo: https://github.com/buildpacks/pack
+    version: 0.38.2
+  ripgrep:
+    repo: https://github.com/BurntSushi/ripgrep
+    version: 14.1.1
+  sd:
+    repo: https://github.com/chmln/sd
+    version: 1.0.0
+  terraform:
+    repo: https://github.com/hashicorp/terraform
+    version: 1.12.2
+  uv:
+    repo: https://github.com/astral-sh/uv
+    version: 0.7.20
+  zoxide:
+    repo: https://github.com/ajeetdsouza/zoxide
+    version: 0.9.8

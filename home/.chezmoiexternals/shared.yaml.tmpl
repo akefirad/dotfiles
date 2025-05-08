@@ -1,0 +1,183 @@
+.config/zsh/ohmyzsh:
+  type: git-repo
+  url: https://github.com/ohmyzsh/ohmyzsh.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/themes/powerlevel10k:
+  type: git-repo
+  url: https://github.com/akefirad/powerlevel10k.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/zsh-autosuggestions:
+  type: git-repo
+  url: https://github.com/zsh-users/zsh-autosuggestions.git
+  refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/fzf-tab:
+  type: git-repo
+  url: https://github.com/Aloxaf/fzf-tab.git
+  refreshPeriod: 168h
+
+# .config/ohmyzsh/custom/plugins/zsh-autocomplete:
+#   type: git-repo
+#   url: https://github.com/marlonrichert/zsh-autocomplete.git
+#   refreshPeriod: 168h
+
+# .config/ohmyzsh/custom/plugins/zsh-syntax-highlighting:
+#   type: git-repo
+#   url: https://github.com/zsh-users/zsh-syntax-highlighting.git
+#   refreshPeriod: 168h
+
+.config/ohmyzsh/custom/plugins/kubetail:
+  type: git-repo
+  url: https://github.com/johanhaleby/kubetail.git
+  refreshPeriod: 168h
+
+.local/bin/act:
+  type: archive-file
+  url: {{ .tools.act.repo }}/releases/download/v{{ .tools.act.version }}/act_{{ .archiveNameAct }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: act
+
+.local/bin/alf:
+  type: file
+  url: https://raw.githubusercontent.com/DannyBen/alf/refs/heads/master/alf
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/aws-sso:
+  type: file
+  url: {{ .tools.awsSso.repo }}/releases/download/v{{ .tools.awsSso.version }}/aws-sso-{{ .tools.awsSso.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/bat:
+  type: archive-file
+  url: {{ .tools.bat.repo }}/releases/download/v{{ .tools.bat.version }}/bat-v{{ .tools.bat.version }}-{{ .archiveNameBat }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: bat-v{{ .tools.bat.version }}-{{ .archiveNameBat }}/bat
+
+.local/bin/cloudflared:
+  type: archive-file
+  url: {{ .tools.cloudflared.repo }}/releases/download/{{ .tools.cloudflared.version }}/cloudflared-{{ .archiveNameCloudflared }}.tgz
+  executable: true
+  # TODO: add checksum!
+  path: cloudflared
+
+.local/bin/fd:
+  type: archive-file
+  url: {{ .tools.fd.repo }}/releases/download/v{{ .tools.fd.version }}/fd-v{{ .tools.fd.version }}-{{ .archiveNameFd }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: fd-v{{ .tools.fd.version }}-{{ .archiveNameFd }}/fd
+
+.local/bin/fx:
+  type: file
+  url: {{ .tools.fx.repo }}/releases/download/{{ .tools.fx.version }}/fx_{{ .chezmoi.os }}_{{ .chezmoi.arch }}
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/fzf:
+  type: archive-file
+  url: {{ .tools.fzf.repo }}/releases/download/v{{ .tools.fzf.version }}/fzf-{{ .tools.fzf.version }}-{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: fzf
+
+.local/bin/gh:
+  type: archive-file
+  url: {{ .tools.gh.repo }}/releases/download/v{{ .tools.gh.version }}/gh_{{ .tools.gh.version }}_{{ .archiveNameGh }}.{{ if eq .chezmoi.os "darwin" }}zip{{ else }}tar.gz{{ end }}
+  executable: true
+  # TODO: add checksum!
+  path: gh_{{ .tools.gh.version }}_{{ .archiveNameGh }}/bin/gh
+
+.local/bin/gdu:
+  type: archive-file
+  url: {{ .tools.gdu.repo }}/releases/download/v{{ .tools.gdu.version }}/gdu_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tgz
+  executable: true
+  # TODO: add checksum!
+  path: gdu_{{ .chezmoi.os }}_{{ .chezmoi.arch }}
+
+.local/bin/helm:
+  type: archive-file
+  url: https://get.helm.sh/helm-v{{ .tools.helm.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: {{ .chezmoi.os }}-{{ .chezmoi.arch }}/helm
+
+.local/bin/jq:
+  type: file
+  url: {{ .tools.jq.repo }}/releases/download/{{ .tools.jq.version }}/jq-{{ .archiveNameJq }}
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/k6:
+  type: archive-file
+  url: {{ .tools.k6.repo }}/releases/download/v{{ .tools.k6.version }}/k6-v{{ .tools.k6.version }}-{{ .archiveNameK6 }}.{{ if eq .chezmoi.os "darwin" }}zip{{ else }}tar.gz{{ end }}
+  executable: true
+  # TODO: add checksum!
+  path: k6-v{{ .tools.k6.version }}-{{ .archiveNameK6 }}/k6
+
+.local/bin/k9s:
+  type: archive-file
+  url: {{ .tools.k9s.repo }}/releases/download/v{{ .tools.k9s.version }}/k9s_{{ .archiveNameK9s }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: k9s
+
+.local/bin/kubectl-133:
+  type: file
+  url: {{ .tools.kubectl133.repo }}/release/v{{ .tools.kubectl133.version }}/bin/{{ .chezmoi.os }}/{{ .chezmoi.arch }}/kubectl
+  executable: true
+  # TODO: add checksum!
+
+.local/bin/pack:
+  type: archive-file
+  url: {{ .tools.pack.repo }}/releases/download/v{{ .tools.pack.version }}/pack-v{{ .tools.pack.version }}-{{ .archiveNamePack }}.tgz
+  executable: true
+  # TODO: add checksum!
+  path: pack
+
+.local/bin/rg:
+  type: archive-file
+  url: {{ .tools.ripgrep.repo }}/releases/download/{{ .tools.ripgrep.version }}/ripgrep-{{ .tools.ripgrep.version }}-{{ .archiveNameRipgrep }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: ripgrep-{{ .tools.ripgrep.version }}-{{ .archiveNameRipgrep }}/rg
+
+.local/bin/sd:
+  type: archive-file
+  url: {{ .tools.sd.repo }}/releases/download/v{{ .tools.sd.version }}/sd-v{{ .tools.sd.version }}-{{ .archiveNameSd }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: sd-v{{ .tools.sd.version }}-{{ .archiveNameSd }}/sd
+
+.local/bin/terraform:
+  type: archive-file
+  url: https://releases.hashicorp.com/terraform/{{ .tools.terraform.version }}/terraform_{{ .tools.terraform.version }}_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.zip
+  executable: true
+  # TODO: add checksum!
+  path: terraform
+
+.local/bin/uv:
+  type: archive-file
+  url: {{ .tools.uv.repo }}/releases/download/{{ .tools.uv.version }}/uv-{{ .archiveNameUv }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: uv-{{ .archiveNameUv }}/uv
+
+.local/bin/uvx:
+  type: archive-file
+  url: {{ .tools.uv.repo }}/releases/download/{{ .tools.uv.version }}/uv-{{ .archiveNameUv }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: uv-{{ .archiveNameUv }}/uvx
+
+.local/bin/zoxide:
+  type: archive-file
+  url: {{ .tools.zoxide.repo }}/releases/download/v{{ .tools.zoxide.version }}/zoxide-{{ .tools.zoxide.version }}-{{ .archiveNameZoxide }}.tar.gz
+  executable: true
+  # TODO: add checksum!
+  path: zoxide

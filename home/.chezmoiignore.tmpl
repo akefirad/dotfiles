@@ -1,0 +1,41 @@
+.config/fish # disable it for now!
+
+{{ if ne .chezmoi.os "darwin" }}
+.chezmoiexternals/darwin.*
+.chezmoiscripts/darwin/**
+.config/homebrew
+.config/karabiner
+.hammerspoon
+Library/**
+{{ end }}
+
+{{ if ne .chezmoi.os "linux" }}
+.chezmoiexternals/linux.*
+.chezmoiscripts/linux/**
+.hushlogin
+.local/bin/nvim
+.local/share/fonts
+{{ end }}
+
+{{ if ne .chezmoi.os "windows" }}
+.chezmoiscripts/windows/**
+Documents
+{{ else }}
+.bash_aliases
+.config/ghostty
+.config/git/cookies
+.config/psql
+.config/readline
+.config/tmux
+.gnupg
+.gnupg/**
+.inputrc
+.oh-my-zsh
+.oh-my-zsh/**
+.p10k.zsh
+.ssh/id_rsa
+.ssh/id_rsa.pub
+.tmux.conf
+.zprofile
+.zshrc
+{{ end }}

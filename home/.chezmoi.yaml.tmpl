@@ -1,0 +1,17 @@
+sourceDir: ~/.dotfiles
+
+data:
+  archiveNameAct: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}Linux{{ end }}_{{ .chezmoi.arch }}
+  archiveNameBat: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  # The name for cloudflared is not properly configured here!
+  archiveNameCloudflared: {{ if eq .chezmoi.os "linux" }}{{ else }}{{ .chezmoi.os }}{{ end }}-{{ .chezmoi.arch }}
+  archiveNameFd: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  archiveNameGh: {{ if eq .chezmoi.os "darwin" }}macOS{{ else }}{{ .chezmoi.os }}{{ end }}_{{ .chezmoi.arch }}
+  archiveNameJq: {{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}-{{ .chezmoi.arch }}
+  archiveNameK6: {{ if eq .chezmoi.os "darwin" }}macos{{ else }}{{ .chezmoi.os }}{{ end }}-{{ .chezmoi.arch }}
+  archiveNameK9s: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}{{ .chezmoi.os }}{{ end }}_{{ .chezmoi.arch }}
+  archiveNamePack: {{ if eq .chezmoi.os "darwin" }}macos{{ else }}{{ .chezmoi.os }}{{ end }}-{{ .chezmoi.arch }}
+  archiveNameRipgrep: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  archiveNameSd: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-musl{{ end }}
+  archiveNameUv: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-gnu{{ end }}
+  archiveNameZoxide: aarch64-{{ if eq .chezmoi.os "darwin" }}apple-darwin{{ else }}unknown-linux-musl{{ end }}

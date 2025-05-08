@@ -1,0 +1,7 @@
+cpus: 4
+memory: 8GiB
+dockercompat: true
+-rosetta: false
+-vmType: vz
+-creds_helpers:
+-    - ecr-login

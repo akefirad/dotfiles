@@ -1,0 +1,6 @@
+{
+  "output": "out",
+  "context": {
+    "cli-telemetry": false
+  }
+}
