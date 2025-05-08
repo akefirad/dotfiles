@@ -1,0 +1,9 @@
+[submodule "clawtilla"]
+	path = clawtilla
+	url = https://github.com/akefirad/clawtilla
+[submodule "oss/hermes-agent"]
+	path = oss/hermes-agent
+	url = https://github.com/NousResearch/hermes-agent
+[submodule "oss/chezmoi"]
+	path = oss/chezmoi
+	url = https://github.com/twpayne/chezmoi.git
