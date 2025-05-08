@@ -1,0 +1,11 @@
+{
+	"auths": {
+		"ghcr.io": {}
+	},
+	"credsStore": "desktop",
+	"credHelpers": {
+		"388531472195.dkr.ecr.eu-central-1.amazonaws.com": "ecr-login",
+		"841731033082.dkr.ecr.eu-central-1.amazonaws.com": "ecr-login"
+	},
+	"currentContext": "desktop-linux"
+}
