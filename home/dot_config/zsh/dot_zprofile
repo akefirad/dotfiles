@@ -1,0 +1,19 @@
+export PATH="$HOME/.local/bin:${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+
+if [[ -d "/opt/homebrew/bin" ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+
+export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+# Add SDKMAN candidates to PATH
+export SDKMAN_DIR=$(brew --prefix sdkman-cli)/libexec
+[[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
