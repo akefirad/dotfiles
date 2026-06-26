@@ -3,8 +3,6 @@
 
 test/.cache/
 
-# Private overlay: per-machine sibling clone, set up by install.sh. Not
-# tracked here so forkers can point at their own private repo (or none)
-# without conflicts on every upstream pull.
+# Private overlay: per-machine sibling clone
 /private/
 /private/clawtilla/private/
