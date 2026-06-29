@@ -13,7 +13,7 @@ tools:
     version: 1.4.7           # linux-only tier-1 (no macOS release binary)
   bun:
     repo: https://github.com/oven-sh/bun
-    version: bun-v1.3.14     # tag is bun-v<ver>; zip holds <name>/bun
+    version: 1.3.14          # template adds bun-v prefix; zip holds <name>/bun
   cloudflared:
     repo: https://github.com/cloudflare/cloudflared
     version: 2026.6.1
