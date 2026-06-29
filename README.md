@@ -119,7 +119,7 @@ clawtilla is the *containment* half. They meet at **credential injection**:
 - On a clawbot (which always runs behind the gateway) chezmoi seeds **fake**
   placeholder creds into the agent's home, per installed tool: signatureless
   Codex/ChatGPT tokens for Hermes and OpenCode
-  ([`home/dot_hermes/`](home/dot_hermes),
+  ([`home/private_dot_hermes/`](home/private_dot_hermes),
   [`home/dot_local/share/opencode/`](home/dot_local/share/opencode); a far-future
   `exp` skips device-login), and a Telegram bot-token placeholder for Hermes
   (`~/.hermes/.env`). Each is gated on `.clawbot` ∧ the tool's `INSTALL_*`, so a tool
@@ -162,7 +162,7 @@ home/                              chezmoi source root (.chezmoiroot points here
   modify_dot_bashrc, modify_dot_profile   managed block sourcing the files below
   dot_config/shell/   env.sh  bashrc.sh  aliases.sh  functions.sh  clawbot.env.tmpl
   dot_config/git/{config.tmpl,ignore}
-  dot_hermes/, dot_local/share/opencode/   fake-cred seeders (gateway injection)
+  private_dot_hermes/, dot_local/share/opencode/   fake-cred seeders (gateway injection)
   **/symlink_*.tmpl                live symlinks into the private overlay
 clawtilla/                         submodule: the egress firewall the clawbots run in
 oss/hermes-agent/                  submodule: Hermes agent upstream (opt-in install)
