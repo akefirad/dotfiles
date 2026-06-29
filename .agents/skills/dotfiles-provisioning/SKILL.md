@@ -9,7 +9,10 @@ description: >-
   symlink, or agent skill. Trigger it even when the user just says "I need <tool>",
   "install X", "set this up on my machine", "add this to my dotfiles", or "make a
   skill/agent config" — anything that should be reproducible via provisioning
-  rather than a throwaway local edit.
+  rather than a throwaway local edit. This applies to a single config file too:
+  "provision / set up / persist the config for <tool>" (e.g.
+  ~/.config/<tool>/config.yaml, ~/.aws/config) means route it through the repo —
+  do NOT just hand-write the live file, even though that seems like the quick path.
 metadata:
   hermes:
     tags: [provisioning, chezmoi, dotfiles, install, tool, package, runtime, mise, config, skill, gating]
@@ -48,6 +51,12 @@ read-only clone are good signals.
 - A **config file or agent artifact** (dotfile, template, symlink, skill,
   `AGENTS.md`, context) → the **placement ladder** below.
 
+**Don't assume a capability is missing just because you don't see it in-session.**
+On a clawbot the environment wires up things that aren't visible to you — GitHub
+push/PR access, Telegram, and similar all "just work" via the gateway. Before you
+skip a step or report a blocker, **verify or actually attempt it**; treat "I don't
+see it" as "check," not "it's not there."
+
 ## Step 2 — Acquisition ladder (tools)
 
 Walk these rungs in order; stop at the first that fits. Detailed tier mechanics,
@@ -80,8 +89,14 @@ mechanics, examples, and artifact-delivery specifics are in
 [references/config-artifacts.md](references/config-artifacts.md) — read it before
 editing the repo.
 
-0. **Track it at all?** A one-off local tweak you don't need on the next box → just
-   write it locally; don't add it to the repo.
+0. **Track it at all — and don't write the live file first.** A genuine one-off
+   tweak you don't need reproduced → write it live, but *say* it isn't provisioned.
+   But if the user said **provision / set up / persist** (or it should survive
+   re-provisioning), do **not** hand-write `~/.config/...`, `~/.aws/...`, etc. —
+   that's the trap: a live file written by hand isn't provisioned and can later
+   *block* `chezmoi apply`. Create the chezmoi source entry, then `chezmoi apply`.
+   **Already wrote it live?** Repair it: replace the live file with the managed
+   source (or move the content into the overlay), re-apply, and say you corrected it.
 1. **Personal / non-public / machine-specific?** (NOT secrets) → it belongs in the
    **private overlay** (`~/.dotfiles/private/`, a *separate* repo), surfaced via a
    `stat`-guarded `symlink_<name>.tmpl`. How you contribute its content depends on
@@ -134,6 +149,13 @@ content.
    - Run `test/run.sh verify` **if Docker is available**; if not, say so explicitly.
 3. **Commit + PR** against `main`, `GH-<xxx>` convention: commit `GH-<xxx> <msg>`,
    PR title `GH-<xxx> <title>`.
+   - *(autonomous agent)* **GitHub access works out of the box** — you don't manage
+     GitHub credentials; `git push` and PR creation just work in your environment
+     (the gateway handles auth; there's nothing for you to set up or inject). Do
+     **not** stop and report *"gh not authenticated"* / *"not logged into any GitHub
+     hosts"* as a blocker — push and open the PR. If a GitHub call genuinely errors
+     on auth, treat it as an environment hiccup to retry/route around, not a reason
+     to abandon the contribution.
 4. **Then, depending on your situation:**
    - **Human in the loop** (your mac): you're done — the human reviews and merges.
      No self-apply needed; `chezmoi apply` on `main` after merge.
@@ -143,6 +165,12 @@ content.
      it's risky, irreversible, or hard to recover from, **don't self-apply** — send
      the PR over Telegram and wait for confirmation before applying. When in doubt,
      wait.
+   - **Telegram works the same way — don't assume it's unavailable.** Not seeing it
+     in your session is *not* evidence it's missing; on a clawbot it's typically
+     wired up and can send. **Actually attempt the send** (or verify the channel)
+     before concluding you can't reach the owner — only fall back to email if the
+     send truly fails, and never silently skip notifying. (Same principle as GitHub
+     above: don't treat "I don't see it" as "it's not there.")
    - **While parked on an unmerged branch** (you applied from it): your working tree
      *is* that branch. **Don't switch branches yet** — that reverts the applied
      change — and `chezmoi apply` / auto-`update` runs *on this branch*, so it won't
@@ -163,8 +191,9 @@ clone token isn't persisted, so there's no push credential):
 1. Edit the local overlay clone under `~/.dotfiles/private/` so `chezmoi apply`
    resolves the symlink and you're unblocked now.
 2. You can't push: generate a patch (`git -C ~/.dotfiles/private format-patch` /
-   `git diff`) and **send it to the owner out-of-band — Telegram or email** — 
-   for them to apply to the private repo properly.
+   `git diff`) and **send it to the owner out-of-band — Telegram (attempt it; don't
+   assume it's unavailable — see Step 4) or email** — for them to apply to the
+   private repo properly. Don't report "done" until the patch has actually been sent.
 3. Surface a marker that an overlay patch is pending owner action. Future provisions
    re-clone the overlay (with a token) and pick up the merged change.
 
