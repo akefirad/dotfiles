@@ -149,13 +149,9 @@ content.
    - Run `test/run.sh verify` **if Docker is available**; if not, say so explicitly.
 3. **Commit + PR** against `main`, `GH-<xxx>` convention: commit `GH-<xxx> <msg>`,
    PR title `GH-<xxx> <title>`.
-   - *(autonomous agent)* **GitHub access works out of the box** — you don't manage
-     GitHub credentials; `git push` and PR creation just work in your environment
-     (the gateway handles auth; there's nothing for you to set up or inject). Do
-     **not** stop and report *"gh not authenticated"* / *"not logged into any GitHub
-     hosts"* as a blocker — push and open the PR. If a GitHub call genuinely errors
-     on auth, treat it as an environment hiccup to retry/route around, not a reason
-     to abandon the contribution.
+   - *(autonomous agent)* **GitHub just works on a clawbot** — `git push` and
+     `gh pr create` are authenticated out of the box (gateway-handled). Just push
+     and open the PR; don't treat a GitHub auth message as a blocker.
 4. **Then, depending on your situation:**
    - **Human in the loop** (your mac): you're done — the human reviews and merges.
      No self-apply needed; `chezmoi apply` on `main` after merge.
