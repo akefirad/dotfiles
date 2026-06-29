@@ -1,0 +1,6 @@
+{{- /* Deliver the canonical dotfiles-provisioning skill onto Hermes' user-skill
+       load path (~/.hermes/skills/devops/). The skill lives at the repo root in
+       .agents/ (outside the chezmoi source tree), so it's always present wherever
+       the repo is cloned — no stat guard needed, unlike the private-overlay
+       symlinks. sourceDir is ~/.dotfiles/home, so ".." is the repo root. */ -}}
+{{- joinPath .chezmoi.sourceDir ".." ".agents" "skills" "dotfiles-provisioning" -}}

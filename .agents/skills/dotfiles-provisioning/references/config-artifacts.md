@@ -1,0 +1,107 @@
+# Config & artifacts: chezmoi mechanics, overlay, and delivery
+
+How tracked files and agent artifacts are wired in this repo. Read this before
+editing, then copy the closest existing entry. The chezmoi source root is `home/`
+(`.chezmoiroot` points there), so a source path `home/dot_config/foo` materializes
+to `~/.config/foo`.
+
+## chezmoi entry types — pick by behavior
+
+| You want… | Source naming | Example in repo |
+|---|---|---|
+| A plain managed file | `dot_<path>` | `dot_config/shell/env.sh` → `~/.config/shell/env.sh` |
+| Per-OS / per-role values | add `.tmpl`, template off `.chezmoi.*` / data / switches | `dot_config/git/config.tmpl` |
+| Append to a file you don't own | `modify_<file>` managed-block script | `modify_dot_bashrc`, `modify_dot_profile` |
+| A live symlink into the overlay | `symlink_<name>.tmpl` (`stat`-guarded) | `dot_claude/symlink_settings.json.tmpl` |
+| 0600 / private perms | `private_` name prefix | `dot_hermes/modify_private_auth.json` |
+| Run logic at apply time | `run_onchange_*` / `run_after_*` script | `.chezmoiscripts/...` |
+
+Notes:
+- **`modify_` scripts** receive the current target file on stdin and print the new
+  content. The idempotent pattern (strip any prior managed block, reappend a fresh
+  one) is in `modify_dot_bashrc` — copy it; don't reinvent.
+- **`.tmpl`** files render through Go templates. Available data: `.chezmoi.os` /
+  `.chezmoi.arch`, the switches (`.clawbot`, `.gui`, `.install.*`), and anything in
+  `.chezmoidata.yaml`. Test with `chezmoi execute-template < file`.
+
+## The private overlay
+
+`~/.dotfiles/private/` is a **separate git repo** cloned into a gitignored sibling
+(not a submodule), holding **personal / non-public** content — *not* secrets. It
+may be absent and, when present on an agent box, is **read-only**
+(the clone token is never persisted, so there's no push credential).
+
+The public tree reaches into it via `symlink_*.tmpl` entries that emit a
+`stat`-guarded absolute path, so the link **dangles silently** when the overlay is
+absent and the public repo always stands alone:
+
+```gotemplate
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "claude" "settings.json" -}}
+{{- if stat $src }}{{ $src }}{{ end -}}
+```
+
+Existing overlay symlinks: `~/.claude/settings.json`, opencode `AGENTS.md`,
+Hermes `SOUL.md`, `~/.config/shell/env.local.sh`. `~/.claude/CLAUDE.md` is a tiny
+*public* file that `@`-includes `AGENTS.md`.
+
+**Contributing overlay content** depends on push access (see SKILL.md Step 4): if
+you can push to the private repo (typically a human), commit/PR there normally; an
+autonomous agent (whose clone token isn't persisted) instead edits the local clone
+to unblock now and sends a patch to the owner. Real credentials never go in the
+overlay — clawbots get *fake* seeded creds for gateway injection (see the seeders
+under `dot_hermes/` and `dot_local/share/opencode/`).
+
+## Gating
+
+`home/.chezmoiignore.tmpl` lists paths *not* applied to a target:
+- omitted entirely → applied on **every** box;
+- under the `{{ if .clawbot }}` block → dropped on clawbots (personal / desktop
+  layer);
+- under `{{ if ne .chezmoi.os "darwin" }}` / `"linux"` blocks → dropped on the
+  other OS;
+- GUI-gated files (desktop apps/config) apply only where a display is detected.
+
+Pick the bucket deliberately and justify it. If *you* (an agent on a clawbot) need
+the file, it must **not** sit under the `{{ if .clawbot }}` block, or your box
+won't receive it.
+
+## Agent-artifact delivery (skills, AGENTS.md, context)
+
+Delivery depends on the consuming agent's real load path — placing the source file
+is not enough; confirm it actually loads.
+
+- **Hermes** loads user skills from `~/.hermes/skills/` (categorized, e.g.
+  `…/skills/devops/<name>/SKILL.md`). So a tracked file under
+  `home/dot_hermes/skills/devops/<name>/SKILL.md` *is* the delivery — it
+  materializes onto the load path, no symlink needed. (Hermes also seeds its own
+  bundled skills there via `cp -rn` at install; coexist by using distinct names.)
+- **Claude Code** reads `~/.claude/skills/` (personal) and `<project>/.claude/skills/`
+  (project). The repo had **no** `~/.claude/skills` wiring historically — don't
+  assume auto-delivery; add the link yourself.
+- **Format:** both Hermes and Claude Code use `SKILL.md` with `name` + `description`
+  frontmatter; Hermes additionally reads `metadata.hermes.*`, which Claude Code
+  ignores. So one canonical `SKILL.md` can serve both via a superset frontmatter.
+
+### How this very skill is delivered (the pattern to reuse)
+
+This skill is the worked example of multi-consumer delivery:
+- **Canonical** files live at `~/.dotfiles/.agents/skills/<name>/` — at the repo
+  root, *outside* `home/`, so chezmoi doesn't manage them; they're just real files
+  present wherever the repo is cloned.
+- **Claude Code (in-repo):** a committed relative symlink
+  `.claude/skills/<name>` → `../../.agents/skills/<name>`, so Claude Code running
+  inside `~/.dotfiles` picks it up as a project skill.
+- **Hermes (any provisioned box):** a chezmoi symlink
+  `home/dot_hermes/skills/devops/symlink_<name>.tmpl` that emits
+  `{{ joinPath .chezmoi.sourceDir ".." ".agents" "skills" <name> }}`, so on apply
+  `~/.hermes/skills/devops/<name>` points at the canonical dir.
+
+Symlinking each skill dir individually (rather than the whole skills folder) is
+deliberate: it lets our skills coexist with Hermes' own seeded `devops` skills.
+
+## macOS differences
+
+On a human macOS box: tier-2 config arrives via `brew`; desktop apps/config are
+GUI-gated; and the contribution path is normal PR + human review (no self-apply or
+patch-out-of-band). Keep these in mind so guidance degrades gracefully off the
+clawbot.
