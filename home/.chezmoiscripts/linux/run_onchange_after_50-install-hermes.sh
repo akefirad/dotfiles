@@ -31,7 +31,7 @@
 # interactive `bootstrap`) and only auto-skips when none is (so it stayed quiet at
 # build time but surfaced under interactive provisioning). --non-interactive
 # additionally skips other input-requiring stages. On a clawbot Hermes auth.json is
-# seeded out-of-band by a chezmoi modify_ (dot_hermes/modify_private_auth.json), and the
+# seeded out-of-band by a chezmoi modify_ (private_dot_hermes/modify_private_auth.json), and the
 # Telegram token placeholder + private dotenv fragment are seeded into ~/.hermes/.env
 # near the end of THIS script (post-install — the installer ships .env.example but
 # doesn't create .env). On a human box configure it interactively with `hermes setup`.
