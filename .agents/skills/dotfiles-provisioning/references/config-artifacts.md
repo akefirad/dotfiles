@@ -51,6 +51,23 @@ to unblock now and sends a patch to the owner. Real credentials never go in the
 overlay — clawbots get *fake* seeded creds for gateway injection (see the seeders
 under `dot_hermes/` and `dot_local/share/opencode/`).
 
+## Verify delivery, not just the source
+
+A successful source edit is not the finish line — confirm the **live target**
+actually became the managed file/symlink after apply:
+
+```bash
+chezmoi apply ~/.config/<tool>           # or `--force` to overwrite a stray live file
+readlink ~/.config/<tool>                # for overlay symlinks: should point at the source
+stat -L ~/.config/<tool>/config.yaml     # exists, right perms, follows the link
+```
+
+**Pitfall — a stray hand-written live file blocks apply.** If `~/.config/<tool>`
+already exists as a plain file/dir you (or someone) wrote by hand, chezmoi won't
+silently clobber it. Decide deliberately: preserve, merge, or replace it with the
+managed path (`chezmoi apply --force <target>` once you've confirmed it's safe to
+overwrite). This is why writing the live file first is a trap.
+
 ## Gating
 
 `home/.chezmoiignore.tmpl` lists paths *not* applied to a target:
