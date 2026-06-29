@@ -71,6 +71,11 @@
   executable: true
   path: terraform
 
+.local/bin/aws-sso:
+  type: file
+  url: {{ .tools.awsSso.repo }}/releases/download/v{{ .tools.awsSso.version }}/aws-sso-{{ .tools.awsSso.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+  executable: true
+
 {{ if not .clawbot -}}
 # ── PERSONAL ONLY ─────────────────────────────────────────────────────────────
 
@@ -105,11 +110,6 @@
   url: {{ .tools.act.repo }}/releases/download/v{{ .tools.act.version }}/act_{{ .archiveNameAct }}.tar.gz
   executable: true
   path: act
-
-.local/bin/aws-sso:
-  type: file
-  url: {{ .tools.awsSso.repo }}/releases/download/v{{ .tools.awsSso.version }}/aws-sso-{{ .tools.awsSso.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
-  executable: true
 
 .local/bin/bun:
   type: archive-file

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Unlock the `SecureStore: file` backend non-interactively: prefer the password
+# from the environment, fall back to an on-disk file.
+#
+# TODO(revisit): the fallback file sits next to the encrypted store it unlocks
+# (mode 0600), so the store currently gets only file-permission protection, not
+# real encryption-at-rest. Accepted for now. Source AWS_SSO_FILE_PASSWORD from the
+# gateway's credential injection (as clawbots already get other creds) and drop the
+# file before relying on the file store as encryption-at-rest.
+password_file="${AWS_SSO_FILE_PASSWORD_FILE:-$HOME/.config/aws-sso/file-password}"
+if [[ -z "${AWS_SSO_FILE_PASSWORD:-}" && -r "$password_file" ]]; then
+  AWS_SSO_FILE_PASSWORD="$(<"$password_file")"
+  export AWS_SSO_FILE_PASSWORD
+fi
+
+if [[ -z "${AWS_SSO_CONFIG:-}" && -e "$HOME/.config/aws-sso/config.yaml" ]]; then
+  AWS_SSO_CONFIG="$HOME/.config/aws-sso/config.yaml"
+  export AWS_SSO_CONFIG
+fi
+
+exec aws-sso "$@"
