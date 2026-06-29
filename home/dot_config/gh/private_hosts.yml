@@ -1,0 +1,13 @@
+# FAKE placeholder gh auth for clawbots. gh checks for a LOCAL token before it calls
+# the GitHub API, so without this it bails ("not logged into any GitHub hosts") even
+# though git push already works through the gateway. The clawtilla github_oauth injector
+# OVERWRITES the Authorization header at the wire with the real token, so this value
+# never authenticates upstream and is not a secret. Mirrors the codex/telegram fake-cred
+# seeding. Clawbot-only (gated in .chezmoiignore); a human box keeps its real hosts.yml.
+github.com:
+    users:
+        clawbot:
+            oauth_token: clawpatrol-placeholder-do-not-use
+    oauth_token: clawpatrol-placeholder-do-not-use
+    user: clawbot
+    git_protocol: https

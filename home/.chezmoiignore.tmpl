@@ -35,6 +35,13 @@
 Library/**
 {{ end -}}
 
+{{ if not .clawbot -}}
+{{- /* ── human only: clawbot-specific seeds (drop on a human box) ──────────────
+       gh hosts.yml carries a FAKE placeholder token for gateway injection; a human
+       box must keep its own real gh auth, so never apply the placeholder there. */ -}}
+.config/gh/hosts.yml
+{{ end -}}
+
 {{ if ne .chezmoi.os "darwin" -}}
 {{- /* ── not macOS ─────────────────────────────────────────────────────────── */ -}}
 .chezmoiexternals/darwin.*
