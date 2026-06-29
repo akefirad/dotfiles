@@ -1,0 +1,24 @@
+SSOConfig:
+    Default:
+        SSORegion: eu-central-1
+        StartUrl: https://wepromise.awsapps.com/start
+        DefaultRegion: eu-central-1
+{{- if .clawbot }}
+        AuthUrlAction: printurl
+{{- else }}
+        AuthUrlAction: open
+{{- end }}
+ConsoleDuration: 720
+CacheRefresh: 168
+LogLevel: error
+HistoryLimit: 10
+HistoryMinutes: 1440
+ProfileFormat: "{{ "{{ FirstItem .AccountName (.AccountAlias | nospace) }}" }}:{{ "{{ .RoleName }}" }}"
+FullTextSearch: true
+{{- if .clawbot }}
+UrlAction: printurl
+AuthWorkflow: device_code
+{{- else }}
+UrlAction: open
+AuthWorkflow: pkce
+{{- end }}
