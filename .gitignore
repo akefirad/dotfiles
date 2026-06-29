@@ -3,6 +3,13 @@
 
 test/.cache/
 
+# skill-creator eval run artifacts (benchmark/grading/outputs/review.html).
+# Throwaway; the skill itself lives in .agents/skills/<name>/.
+*-workspace/
+
+# Transient git worktrees created by background agents (keep .claude/skills/).
+/.claude/worktrees/
+
 # Private overlay: per-machine sibling clone, set up by install.sh. Not
 # tracked here so forkers can point at their own private repo (or none)
 # without conflicts on every upstream pull.

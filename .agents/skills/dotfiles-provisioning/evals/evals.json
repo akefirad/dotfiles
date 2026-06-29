@@ -1,0 +1,21 @@
+{
+  "skill_name": "dotfiles-provisioning",
+  "evals": [
+    {
+      "id": 0,
+      "name": "tier1-hyperfine",
+      "prompt": "I do a lot of shell benchmarking and I keep reaching for hyperfine but it's never installed on my boxes. Can you set it up properly in my dotfiles so every machine I provision gets it from now on? Upstream is github.com/sharkdp/hyperfine.",
+      "expected_output": "Adds hyperfine as a TIER-1 release binary: new entry in home/.chezmoidata.yaml (repo + pinned version), a download entry in home/.chezmoiexternals/shared.yaml.tmpl (.local/bin/hyperfine, archive-file), and an archiveNameHyperfine line in home/.chezmoi.yaml.tmpl. On a branch. Does NOT apt-install / ad-hoc install, does NOT use a vendor script when a release binary exists.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "runtime-node",
+      "prompt": "I need Node.js 26 on this box to run a build step. Get it set up — and ideally in a way that sticks so I don't have to redo it on every machine.",
+      "expected_output": "Recognizes Node is a language runtime → uses mise (e.g. `mise use -g node@26`), which the repo does NOT provision. Does NOT add node to .chezmoidata.yaml / shared.yaml.tmpl / any tier, does NOT write a vendor installer or apt-install nodejs.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}
