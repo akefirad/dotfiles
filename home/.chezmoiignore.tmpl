@@ -42,11 +42,18 @@ Library/**
        aws-sso skill is headless/clawbot-only (device-code + the aws-sso-auto
        wrapper); a human box logs in interactively and has no use for it. Both
        runtimes' symlinks resolve to the same ai/skills/aws-sso source.
+       app-log-investigation is likewise an agent/clawbot skill (queries CloudWatch
+       via read-only SSO using aws-sso); both runtimes' symlinks resolve to the same
+       private-overlay source, and its shared aws-architecture.md reference (surfaced
+       at ~/.config/ai/references/) serves only that skill, so it's gated too.
        NB: keep these as consecutive bare lines — an inline {{ "{{- … -}}" }}
        comment between them trims the newlines and glues two patterns into one. */ -}}
 .config/gh/hosts.yml
 .claude/skills/aws-sso
 .hermes/skills/devops/aws-sso
+.claude/skills/app-log-investigation
+.hermes/skills/devops/app-log-investigation
+.config/ai/references/aws-architecture.md
 {{ end -}}
 
 {{ if ne .chezmoi.os "darwin" -}}

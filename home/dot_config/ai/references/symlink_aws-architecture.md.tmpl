@@ -1,0 +1,11 @@
+{{- /* Surface the shared AWS org-architecture doc on a stable runtime path
+       (~/.config/ai/references/aws-architecture.md) that both runtimes' SKILL.md
+       files reference by absolute path. The content is PRIVATE (account ids, network
+       layout), so the source is the private overlay — same model as opencode's
+       AGENTS.md symlink. sourceDir is ~/.dotfiles/home, so ".." is the repo root; the
+       overlay is its sibling under private/. The stat guard makes the link dangle
+       silently when the overlay is absent, so the public tree always stands alone.
+       Not bundled in the skill — it's shared, and referenced by path. Robot-only:
+       gated to clawbots in .chezmoiignore alongside the skills it serves. */ -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "ai" "references" "aws-architecture.md" -}}
+{{- if stat $src }}{{ $src }}{{ end -}}
