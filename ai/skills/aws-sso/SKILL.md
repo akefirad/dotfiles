@@ -17,28 +17,6 @@ job, not this skill). Always drive it through the **`aws-sso-auto`** wrapper: it
 supplies the secure-store password and config path non-interactively, so login and
 credential refresh work without prompts.
 
-## Am I already authenticated?
-
-```bash
-aws-sso-auto list AccountName RoleName Profile Expires --csv
-```
-
-Shows the roles you can assume and when each cached credential expires. If the
-profile you need is still valid, skip login.
-
-## Log in (one human approval per session)
-
-The agent has no browser, so login uses the device-code flow:
-
-```bash
-aws-sso-auto login --url-action printurl
-```
-
-It prints a URL and a verification code. Hand both to the human and wait for them to
-approve in their browser. If you retried, only the code from the **currently
-running** login process is valid. After approval, AWS CLI calls refresh credentials
-automatically for the rest of the session.
-
 ## Run AWS CLI commands
 
 Profiles live in `~/.aws/config`; pick one with `AWS_PROFILE` and let
@@ -49,8 +27,59 @@ AWS_PROFILE='<Account>:<Role>' aws sts get-caller-identity
 AWS_PROFILE='<Account>:<Role>' aws s3 ls
 ```
 
+Each profile's `credential_process` re-mints short-lived STS role credentials
+**automatically and non-interactively** on every `aws` call, so you don't manage
+or refresh credentials by hand — just run the command you wanted.
+
 First time on a fresh box (or if a profile is missing), regenerate them once:
 `aws-sso-auto setup profiles --force`.
+
+## Am I already authenticated?
+
+Don't guess from cached state — **just run the command.** Because
+`credential_process` refreshes STS creds transparently, the only reliable check is
+a real call:
+
+```bash
+AWS_PROFILE='<Account>:<Role>' aws sts get-caller-identity
+```
+
+If it succeeds, you're authenticated. `aws-sso-auto list AccountName RoleName
+Profile Expires --csv` is purely **informational** — it shows when each *cached*
+STS credential lapses. `Expired` there means only that the cache is stale; the next
+`aws` call re-mints it for you. It does **not** mean you're logged out, and it is
+**not** a signal to log in.
+
+## When do I actually need to log in?
+
+Two different credential lifetimes are in play — don't conflate them:
+
+- **STS role credentials** — short-lived, per-profile. This is what
+  `aws-sso-auto list … Expires` displays and what `credential_process` refreshes
+  automatically on the next `aws` call. Expiry here needs **no action**.
+  (`aws-sso-auto … --sts-refresh` forces an immediate refresh, but that's normally
+  unnecessary.)
+- **SSO session** — long-lived (hours, per the IdP session). Created by the
+  device-code login flow, and the **only** thing that requires human browser
+  approval.
+
+**Rule:** never run `login` because `list` shows `Expired`. Log in only when an
+actual `aws` call **fails** with an error saying the SSO session/token is expired
+or missing (reauthentication required).
+
+## Log in — fallback when the SSO session has expired
+
+Reach for this only after a real `aws` call fails for the reason above. The agent
+has no browser, so login uses the device-code flow:
+
+```bash
+aws-sso-auto login --url-action printurl
+```
+
+It prints a URL and a verification code. Hand both to the human and wait for them to
+approve in their browser. If you retried, only the code from the **currently
+running** login process is valid. After approval, AWS CLI calls refresh credentials
+automatically for the rest of the session.
 
 ## Never leak secrets
 
