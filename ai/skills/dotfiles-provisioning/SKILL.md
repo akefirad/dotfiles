@@ -43,8 +43,7 @@ Two things shape every later decision. Figure them out first:
   can review and merge — open a normal PR and let them.
 
 If unsure: are you on a headless box with no interactive user? Then assume the
-clawbot path. `uname`, `$DISPLAY`, and whether `~/.dotfiles/private/` is a
-read-only clone are good signals.
+clawbot path. `uname` and `$DISPLAY` are good signals.
 
 **What am I adding?** This picks the decision ladder:
 - A **CLI tool / binary** → the **acquisition ladder** below.
@@ -99,9 +98,9 @@ editing the repo.
    source (or move the content into the overlay), re-apply, and say you corrected it.
 1. **Personal / non-public / machine-specific?** (NOT secrets) → it belongs in the
    **private overlay** (`~/.dotfiles/private/`, a *separate* repo), surfaced via a
-   `stat`-guarded `symlink_<name>.tmpl`. How you contribute its content depends on
-   whether you can push to the private repo (Step 4): a human usually can (normal
-   commit/PR); an autonomous agent usually can't → patch out-of-band.
+   `stat`-guarded `symlink_<name>.tmpl`. Contribute its content the same way as the
+   public repo — branch + PR on the overlay repo (Step 4) — for humans and autonomous
+   agents alike.
 2. **Otherwise pick the chezmoi entry type by behavior:** plain file → `dot_<path>`;
    needs per-OS/role values → add `.tmpl`; must append to a file you don't own
    (`.bashrc`) → a `modify_` managed-block script; live overlay symlink →
@@ -129,11 +128,13 @@ First decide **which repo the change targets**. An overlay-backed file is often
 *two* changes in *two* repos: the public `symlink_*.tmpl` stub **and** the private
 content.
 
-- **Public repo** (`~/.dotfiles`): branch and open a PR (if you have push).
-- **Private overlay** (`~/.dotfiles/private/`): a separate repo. If you can push to
-  it (typically a human), contribute the content there normally (commit/PR). If you
-  can't (an autonomous agent — the clone token isn't persisted), use **patch
-  out-of-band** (below).
+- **Public repo** (`~/.dotfiles`): branch and open a PR.
+- **Private overlay** (`~/.dotfiles/private/`): a separate GitHub repo, contributed
+  to **exactly like the public repo** — branch + PR. On a clawbot the gateway
+  authenticates push/PR for *any* github.com repo (the overlay's origin is a plain
+  https URL with no embedded token), so "the clone token isn't persisted" does **not**
+  mean you can't push — auth simply comes from the gateway at push time, same as the
+  public repo. See "Private overlay" below for the two wrinkles.
 
 ### Public repo
 
@@ -178,20 +179,23 @@ content.
      now (your change is in `main`), and the pull also brings in any other merges you
      were missing while parked.
 
-### Private overlay → patch out-of-band
+### Private overlay
 
-If you can push to the private repo (typically a human), contribute there normally —
-commit and open a PR on the private repo. Otherwise (an autonomous agent, whose
-clone token isn't persisted, so there's no push credential):
+The overlay is a separate GitHub repo, so contribute to it the **same way as the
+public repo** — branch off its `main`, push, and open a PR — using the same
+gateway-authenticated `git`/`gh` that work for the public repo. The self-apply
+decision is identical too: park on your branch by recoverability, notify the owner,
+reconcile to `main` after merge. Two wrinkles are specific to the overlay:
 
-1. Edit the local overlay clone under `~/.dotfiles/private/` so `chezmoi apply`
-   resolves the symlink and you're unblocked now.
-2. You can't push: generate a patch (`git -C ~/.dotfiles/private format-patch` /
-   `git diff`) and **send it to the owner out-of-band — Telegram (attempt it; don't
-   assume it's unavailable — see Step 4) or email** — for them to apply to the
-   private repo properly. Don't report "done" until the patch has actually been sent.
-3. Surface a marker that an overlay patch is pending owner action. Future provisions
-   re-clone the overlay (with a token) and pick up the merged change.
+1. **It may not be present.** On a clawbot the overlay is cloned at provision only
+   when a token was available, so `~/.dotfiles/private/` can be absent. If it is,
+   **clone it first** — the gateway authenticates the clone like any github.com repo;
+   its URL mirrors the public repo's origin with a leading dot on the repo name
+   (`https://<host>/<owner>/.<repo>.git`). Then run **`chezmoi apply` once** so the
+   overlay symlinks resolve and everything refreshes. Now branch + PR as above.
+2. **It's a second repo.** An overlay-backed change is usually *two* PRs — the public
+   `symlink_*.tmpl` stub in `~/.dotfiles` and the content in `~/.dotfiles/private`.
+   Land and track both.
 
 ## Hard rules
 

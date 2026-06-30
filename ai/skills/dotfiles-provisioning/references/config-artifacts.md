@@ -27,9 +27,11 @@ Notes:
 ## The private overlay
 
 `~/.dotfiles/private/` is a **separate git repo** cloned into a gitignored sibling
-(not a submodule), holding **personal / non-public** content — *not* secrets. It
-may be absent and, when present on an agent box, is **read-only**
-(the clone token is never persisted, so there's no push credential).
+(not a submodule), holding **personal / non-public** content — *not* secrets. It may
+be absent (it's cloned at provision only when a token was available). The clone token
+is never written to its `.git/config`, but that does **not** make it read-only on a
+clawbot: pushes authenticate through the gateway like any github.com repo, exactly as
+they do for the public repo.
 
 The public tree reaches into it via `symlink_*.tmpl` entries that emit a
 `stat`-guarded absolute path, so the link **dangles silently** when the overlay is
@@ -44,12 +46,12 @@ Existing overlay symlinks: `~/.claude/settings.json`, opencode `AGENTS.md`,
 Hermes `SOUL.md`, `~/.config/shell/env.local.sh`. `~/.claude/CLAUDE.md` is a tiny
 *public* file that `@`-includes `AGENTS.md`.
 
-**Contributing overlay content** depends on push access (see SKILL.md Step 4): if
-you can push to the private repo (typically a human), commit/PR there normally; an
-autonomous agent (whose clone token isn't persisted) instead edits the local clone
-to unblock now and sends a patch to the owner. Real credentials never go in the
-overlay — clawbots get *fake* seeded creds for gateway injection (see the seeders
-under `dot_hermes/` and `dot_local/share/opencode/`).
+**Contributing overlay content** works like the public repo (see SKILL.md Step 4):
+branch + PR on the overlay repo, for humans and autonomous agents alike. If the
+overlay clone is absent on a clawbot, clone it first (gateway-authenticated) and run
+`chezmoi apply` once before branching. Real credentials never go in the overlay —
+clawbots get *fake* seeded creds for gateway injection (see the seeders under
+`dot_hermes/` and `dot_local/share/opencode/`).
 
 ## Verify delivery, not just the source
 
@@ -126,6 +128,5 @@ lets our skills coexist with Hermes' own seeded `devops` skills.
 ## macOS differences
 
 On a human macOS box: tier-2 config arrives via `brew`; desktop apps/config are
-GUI-gated; and the contribution path is normal PR + human review (no self-apply or
-patch-out-of-band). Keep these in mind so guidance degrades gracefully off the
-clawbot.
+GUI-gated; and the contribution path is normal PR + human review (no self-apply).
+Keep these in mind so guidance degrades gracefully off the clawbot.
