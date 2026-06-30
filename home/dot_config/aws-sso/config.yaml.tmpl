@@ -19,7 +19,7 @@ FullTextSearch: true
 UrlAction: printurl
 AuthWorkflow: device_code
 SecureStore: file
-ConfigProfilesBinaryPath: {{ joinPath .chezmoi.homeDir ".local" "bin" "aws-sso-agent" }}
+ConfigProfilesBinaryPath: {{ joinPath .chezmoi.homeDir ".local" "bin" "aws-sso-auto" }}
 {{- else }}
 UrlAction: open
 AuthWorkflow: pkce

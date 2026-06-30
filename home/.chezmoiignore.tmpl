@@ -38,8 +38,15 @@ Library/**
 {{ if not .clawbot -}}
 {{- /* ── human only: clawbot-specific seeds (drop on a human box) ──────────────
        gh hosts.yml carries a FAKE placeholder token for gateway injection; a human
-       box must keep its own real gh auth, so never apply the placeholder there. */ -}}
+       box must keep its own real gh auth, so never apply the placeholder there.
+       aws-sso skill is headless/clawbot-only (device-code + the aws-sso-auto
+       wrapper); a human box logs in interactively and has no use for it. Both
+       runtimes' symlinks resolve to the same ai/skills/aws-sso source.
+       NB: keep these as consecutive bare lines — an inline {{ "{{- … -}}" }}
+       comment between them trims the newlines and glues two patterns into one. */ -}}
 .config/gh/hosts.yml
+.claude/skills/aws-sso
+.hermes/skills/devops/aws-sso
 {{ end -}}
 
 {{ if ne .chezmoi.os "darwin" -}}
