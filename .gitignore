@@ -4,7 +4,7 @@
 test/.cache/
 
 # skill-creator eval run artifacts (benchmark/grading/outputs/review.html).
-# Throwaway; the skill itself lives in .agents/skills/<name>/.
+# Throwaway; the skill itself lives in ai/skills/<name>/.
 *-workspace/
 
 # Transient git worktrees created by background agents (keep .claude/skills/).
