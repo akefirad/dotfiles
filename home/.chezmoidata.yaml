@@ -35,6 +35,9 @@ tools:
   gh:
     repo: https://github.com/cli/cli
     version: 2.95.0
+  glow:
+    repo: https://github.com/charmbracelet/glow
+    version: 2.1.2
   helm:
     repo: https://github.com/helm/helm
     version: 4.2.2

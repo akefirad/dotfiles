@@ -86,6 +86,7 @@ data:
     repo: {{ $p10kRepo | quote }}
   # GoReleaser-style: <Capitalized OS>_<x86_64|arm64>
   archiveNameAct: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}Linux{{ end }}_{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}{{ .chezmoi.arch }}{{ end }}
+  archiveNameGlow: {{ if eq .chezmoi.os "darwin" }}Darwin{{ else }}Linux{{ end }}_{{ if eq .chezmoi.arch "amd64" }}x86_64{{ else }}{{ .chezmoi.arch }}{{ end }}
 
   # Rust target triples. The linux distribution flavor (gnu vs musl) is
   # chosen per project based on which the upstream actually ships:
