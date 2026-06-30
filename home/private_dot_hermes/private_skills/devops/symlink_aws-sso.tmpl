@@ -1,0 +1,6 @@
+{{- /* Deliver the canonical aws-sso skill onto Hermes' user-skill load path
+       (~/.hermes/skills/devops/). The skill lives at the repo root in ai/ (outside
+       the chezmoi source tree), so the same source feeds both this and Claude's
+       ~/.claude/skills/ symlink — one copy, no drift. sourceDir is ~/.dotfiles/home,
+       so ".." is the repo root. Robot-only: gated to clawbots in .chezmoiignore. */ -}}
+{{- joinPath .chezmoi.sourceDir ".." "ai" "skills" "aws-sso" -}}
