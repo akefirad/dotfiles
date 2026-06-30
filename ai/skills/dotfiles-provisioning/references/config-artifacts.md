@@ -102,19 +102,26 @@ is not enough; confirm it actually loads.
 ### How this very skill is delivered (the pattern to reuse)
 
 This skill is the worked example of multi-consumer delivery:
-- **Canonical** files live at `~/.dotfiles/.agents/skills/<name>/` — at the repo
-  root, *outside* `home/`, so chezmoi doesn't manage them; they're just real files
-  present wherever the repo is cloned.
+- **Canonical** files live at `~/.dotfiles/ai/skills/<name>/` — at the repo root,
+  *outside* `home/`, so chezmoi doesn't manage them; they're just real files present
+  wherever the repo is cloned. Every skill (aws-sso, dotfiles-provisioning, …) lives
+  here, so there's one home and one copy.
+- **`.agents/` compat:** a committed relative symlink `.agents/skills/<name>` →
+  `../../ai/skills/<name>`, so anything that scans the conventional `.agents/skills/`
+  path (and the in-repo Claude Code link below) still resolves.
 - **Claude Code (in-repo):** a committed relative symlink
   `.claude/skills/<name>` → `../../.agents/skills/<name>`, so Claude Code running
-  inside `~/.dotfiles` picks it up as a project skill.
+  inside `~/.dotfiles` picks it up as a project skill (resolves on through `.agents/`
+  to `ai/`).
 - **Hermes (any provisioned box):** a chezmoi symlink
   `home/dot_hermes/skills/devops/symlink_<name>.tmpl` that emits
-  `{{ joinPath .chezmoi.sourceDir ".." ".agents" "skills" <name> }}`, so on apply
+  `{{ joinPath .chezmoi.sourceDir ".." "ai" "skills" <name> }}`, so on apply
   `~/.hermes/skills/devops/<name>` points at the canonical dir.
 
-Symlinking each skill dir individually (rather than the whole skills folder) is
-deliberate: it lets our skills coexist with Hermes' own seeded `devops` skills.
+All of these are **directory** symlinks: the whole skill dir (SKILL.md plus any
+scripts, references, evals) is delivered in one link — no per-file linking. Linking
+each skill dir individually (rather than the whole skills folder) is deliberate: it
+lets our skills coexist with Hermes' own seeded `devops` skills.
 
 ## macOS differences
 
