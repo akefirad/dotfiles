@@ -1,2 +1,2 @@
-{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "ai" "agents.md" -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "ai" "agents.md" -}}
 {{- if stat $src }}{{ $src }}{{ end -}}
