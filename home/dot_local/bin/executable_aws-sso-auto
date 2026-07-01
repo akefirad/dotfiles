@@ -20,4 +20,78 @@ if [[ -z "${AWS_SSO_CONFIG:-}" && -e "$HOME/.config/aws-sso/config.yaml" ]]; the
   export AWS_SSO_CONFIG
 fi
 
-exec aws-sso "$@"
+# Fast path: every invocation except `login` (notably the credential_process
+# `process` calls, which happen on every `aws` command) just execs aws-sso with no
+# extra work. Only a `login` gets the post-auth identity guard below.
+is_login=false
+for arg in "$@"; do
+  if [[ "$arg" == login ]]; then
+    is_login=true
+    break
+  fi
+done
+
+if [[ "$is_login" == false ]]; then
+  exec aws-sso "$@"
+fi
+
+# --- login path -----------------------------------------------------------------
+# Device-code login is approved by a human in a browser. If that browser is signed
+# into AWS SSO as the *wrong* user (e.g. a real person, not the bot's dedicated SSO
+# user), the token binds to them and this box would silently inherit their identity.
+# Guard against it: after login, assert every role the authenticated user can reach
+# is within the allowlist declared in the config's Accounts block. Anything outside
+# it means the wrong user approved — log out and fail.
+aws-sso "$@"
+
+config="${AWS_SSO_CONFIG:-$HOME/.config/aws-sso/config.yaml}"
+
+# Allowed roles = the role names declared under Accounts in the (overlay-sourced)
+# config. Empty set means nothing is declared to enforce (personal box, or the
+# overlay allowlist is absent) — there's nothing to check against, so skip.
+allowed=()
+if command -v yq >/dev/null 2>&1; then
+  while IFS= read -r r; do
+    [[ -n "$r" ]] && allowed+=("$r")
+  done < <(yq -r '.SSOConfig.Default.Accounts[].Roles | keys | .[]' "$config" 2>/dev/null | sort -u)
+fi
+
+if [[ ${#allowed[@]} -eq 0 ]]; then
+  echo "aws-sso-auto: no role allowlist declared in $config; skipping login identity guard." >&2
+  exit 0
+fi
+
+# Roles the just-authenticated SSO user can actually reach. Drop the CSV header and
+# any blank lines.
+accessible=()
+while IFS= read -r r; do
+  [[ -n "$r" && "$r" != "RoleName" ]] && accessible+=("$r")
+done < <(aws-sso list --csv RoleName 2>/dev/null | sort -u)
+
+if [[ ${#accessible[@]} -eq 0 ]]; then
+  echo "aws-sso-auto: WARNING: could not read the authenticated user's roles; identity guard not verified." >&2
+  exit 0
+fi
+
+# Any accessible role outside the allowlist means the wrong identity approved.
+violations=()
+for role in "${accessible[@]}"; do
+  ok=false
+  for a in "${allowed[@]}"; do
+    [[ "$role" == "$a" ]] && { ok=true; break; }
+  done
+  [[ "$ok" == false ]] && violations+=("$role")
+done
+
+if [[ ${#violations[@]} -gt 0 ]]; then
+  {
+    echo "aws-sso-auto: SSO identity mismatch — the authenticated user can access role(s)"
+    echo "  outside this bot's allowlist:"
+    printf '    - %s\n' "${violations[@]}"
+    echo "  expected only: ${allowed[*]}"
+    echo "  This usually means the device link was approved under the wrong SSO user."
+    echo "  Logging out; approve again as the bot's dedicated SSO user."
+  } >&2
+  aws-sso logout >/dev/null 2>&1 || true
+  exit 1
+fi

@@ -7,3 +7,6 @@
 [submodule "oss/chezmoi"]
 	path = oss/chezmoi
 	url = https://github.com/twpayne/chezmoi.git
+[submodule "oss/aws-sso-cli"]
+	path = oss/aws-sso-cli
+	url = https://github.com/synfinatic/aws-sso-cli

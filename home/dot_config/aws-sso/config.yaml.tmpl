@@ -8,6 +8,20 @@ SSOConfig:
 {{- else }}
         AuthUrlAction: open
 {{- end }}
+{{- /* The Accounts/Roles allowlist carries real account IDs + role names, so it
+       lives in the private overlay, never the public repo. The overlay is cloned at
+       the same sibling `private/` on every box — the personal repo on a human box,
+       the agent repo on a clawbot — so the path is identical for both; whichever repo
+       is cloned there supplies (or omits) the allowlist. Same idiom as the other
+       overlay stubs (app-log-investigation, aws-architecture.md). Pulled in via
+       `include` (not a symlink) so the surrounding template — notably
+       ConfigProfilesBinaryPath's homeDir — still renders. stat-guarded, so the public
+       repo stands alone: no Accounts block when the overlay (or the file) is absent.
+       On the clawbot this block is what the aws-sso-auto wrapper enforces after login. */ -}}
+{{- $accts := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "aws-sso" "accounts.yaml" -}}
+{{- if stat $accts }}
+{{ include $accts | trim | indent 8 }}
+{{- end }}
 ConsoleDuration: 720
 CacheRefresh: 168
 LogLevel: error
