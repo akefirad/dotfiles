@@ -1,0 +1,19 @@
+{{- /* Flat, one-role-per-line allowlist for the aws-sso-auto login identity guard.
+       Materialized here at provision time from the private overlay's accounts.yaml
+       (the same source config.yaml.tmpl's Accounts block includes), so the wrapper
+       needs no YAML parser (no yq) at runtime, and a malformed allowlist fails loudly
+       at `chezmoi apply` rather than silently in the guard. Empty when the overlay is
+       absent (e.g. a personal box); the wrapper treats empty/absent as "no allowlist,
+       nothing to enforce". stat-guarded so the public repo stands alone. */ -}}
+{{- $accts := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "aws-sso" "accounts.yaml" -}}
+{{- if stat $accts -}}
+{{- $roles := dict -}}
+{{- range $id, $acct := (include $accts | fromYaml).Accounts -}}
+{{- range $role, $_ := $acct.Roles -}}
+{{- $_ := set $roles $role true -}}
+{{- end -}}
+{{- end -}}
+{{- range (keys $roles | sortAlpha) -}}
+{{- . }}{{ "\n" }}
+{{- end -}}
+{{- end -}}
