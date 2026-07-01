@@ -81,6 +81,24 @@ approve in their browser. If you retried, only the code from the **currently
 running** login process is valid. After approval, AWS CLI calls refresh credentials
 automatically for the rest of the session.
 
+**Identity guard (automatic).** This box has its own dedicated SSO user. The human
+approving the device link must be signed into AWS SSO **as that bot user**, not as
+themselves — otherwise the token binds to *their* identity and this box inherits it.
+To catch that, `aws-sso-auto login` verifies, right after login, that every role the
+authenticated user can reach is within the bot's allowlist (the `Accounts`/`Roles`
+block in `~/.config/aws-sso/config.yaml`). If it isn't, login **fails**:
+
+```
+aws-sso-auto: SSO identity mismatch — the authenticated user can access role(s)
+  outside this bot's allowlist: ...
+```
+
+That message means the wrong SSO user approved the link. Do **not** work around it
+(don't call bare `aws-sso login`, don't edit the allowlist to admit the extra roles).
+Ask the human to approve again signed in as the **bot's** SSO user, then re-run
+`aws-sso-auto login`. The guard is skipped only when no allowlist is declared (e.g. a
+personal box); on this box it is expected to be enforced.
+
 ## Never leak secrets
 
 Do not print or echo `AWS_SSO_FILE_PASSWORD`, the password file, credential-process
