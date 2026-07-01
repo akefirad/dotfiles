@@ -40,24 +40,29 @@ fi
 # into AWS SSO as the *wrong* user (e.g. a real person, not the bot's dedicated SSO
 # user), the token binds to them and this box would silently inherit their identity.
 # Guard against it: after login, assert every role the authenticated user can reach
-# is within the allowlist declared in the config's Accounts block. Anything outside
-# it means the wrong user approved — log out and fail.
+# is within the bot's allowlist. Anything outside it — or an inability to verify —
+# logs out and fails. The guard fails CLOSED: a broken login is recoverable; silently
+# inheriting an unverified identity is not.
 aws-sso "$@"
 
 config="${AWS_SSO_CONFIG:-$HOME/.config/aws-sso/config.yaml}"
 
-# Allowed roles = the role names declared under Accounts in the (overlay-sourced)
-# config. Empty set means nothing is declared to enforce (personal box, or the
-# overlay allowlist is absent) — there's nothing to check against, so skip.
+# Allowlist of role names the bot's dedicated identity may reach. Provisioned (chezmoi)
+# into a flat one-per-line file beside the config, derived from the overlay's
+# accounts.yaml — so this guard needs no YAML parser at runtime and a malformed
+# allowlist fails loudly at `chezmoi apply`, not silently here. An empty or absent file
+# means no allowlist is declared (e.g. a personal box): nothing to enforce, so skip.
+allowlist_file="$(dirname "$config")/allowed-roles"
 allowed=()
-if command -v yq >/dev/null 2>&1; then
-  while IFS= read -r r; do
+if [[ -r "$allowlist_file" ]]; then
+  # `|| [[ -n "$r" ]]` so a final line without a trailing newline is still read.
+  while IFS= read -r r || [[ -n "$r" ]]; do
     [[ -n "$r" ]] && allowed+=("$r")
-  done < <(yq -r '.SSOConfig.Default.Accounts[].Roles | keys | .[]' "$config" 2>/dev/null | sort -u)
+  done < "$allowlist_file"
 fi
 
 if [[ ${#allowed[@]} -eq 0 ]]; then
-  echo "aws-sso-auto: no role allowlist declared in $config; skipping login identity guard." >&2
+  echo "aws-sso-auto: no role allowlist at $allowlist_file; skipping login identity guard." >&2
   exit 0
 fi
 
@@ -68,9 +73,15 @@ while IFS= read -r r; do
   [[ -n "$r" && "$r" != "RoleName" ]] && accessible+=("$r")
 done < <(aws-sso list --csv RoleName 2>/dev/null | sort -u)
 
+# Couldn't read the identity's roles right after login → can't verify → fail closed.
 if [[ ${#accessible[@]} -eq 0 ]]; then
-  echo "aws-sso-auto: WARNING: could not read the authenticated user's roles; identity guard not verified." >&2
-  exit 0
+  {
+    echo "aws-sso-auto: could not read the authenticated user's roles, so the SSO identity"
+    echo "  guard could not be verified. Failing closed and logging out."
+    echo "  Retry: aws-sso-auto login   (debug: aws-sso list --csv RoleName)"
+  } >&2
+  aws-sso logout >/dev/null 2>&1 || true
+  exit 1
 fi
 
 # Any accessible role outside the allowlist means the wrong identity approved.
