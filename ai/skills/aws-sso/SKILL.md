@@ -1,7 +1,7 @@
 ---
 name: aws-sso
-description: Use when an agent on a clawbot/headless box needs to authenticate to AWS and run AWS CLI commands (via aws-sso-cli / IAM Identity Center), or to troubleshoot AWS SSO auth failures. The install and config are provisioned by dotfiles; this covers logging in and using it.
-version: 1.0.0
+description: Use when an agent on a clawbot/headless box needs to authenticate to AWS and run AWS CLI commands (via aws-sso-cli / IAM Identity Center), regenerate or reconfigure SSO profiles after IAM Identity Center role/account changes, or troubleshoot AWS SSO auth failures. The install and config are provisioned by dotfiles; this covers logging in and using it.
+version: 1.1.0
 author: clawbot
 metadata:
   hermes:
@@ -99,10 +99,33 @@ Ask the human to approve again signed in as the **bot's** SSO user, then re-run
 `aws-sso-auto login`. The guard is skipped only when no allowlist is declared (e.g. a
 personal box); on this box it is expected to be enforced.
 
+## Reconfigure after role or account changes
+
+When IAM Identity Center roles or accounts change (a role renamed, a new account
+added), both the generated profiles and the identity-guard allowlist can go stale:
+
+- **Regenerate profiles** so `~/.aws/config` matches the current roles:
+  ```bash
+  aws-sso-auto login --url-action printurl   # only if the SSO session has lapsed
+  aws-sso-auto setup profiles --force
+  ```
+- **Keep the allowlist in sync.** The identity guard checks reachable roles against
+  the `Accounts`/`Roles` block in `~/.config/aws-sso/config.yaml`, which is sourced
+  from the private overlay's `home/config/aws-sso/accounts.yaml`. A *legitimate*
+  role/account change that isn't reflected there makes `aws-sso-auto login` fail with
+  an "SSO identity mismatch". Update `accounts.yaml` and re-provision via the
+  **`dotfiles-provisioning`** skill — don't hand-edit the live `config.yaml` or widen
+  the allowlist to dodge the guard.
+
+Deeper resets (rotating the secure-store password, rewriting the
+`# BEGIN/END_AWS_SSO_CLI` block in `~/.aws/config`) are provisioning concerns — use
+`dotfiles-provisioning`, not manual surgery here.
+
 ## Never leak secrets
 
-Do not print or echo `AWS_SSO_FILE_PASSWORD`, the password file, credential-process
-JSON from `aws-sso process`, or STS `AccessKeyId`/`SecretAccessKey`/`SessionToken`.
+Do not print or echo `AWS_SSO_FILE_PASSWORD`, the password file, the
+`~/.config/aws-sso/secure/` auth cache, credential-process JSON from `aws-sso
+process`, or STS `AccessKeyId`/`SecretAccessKey`/`SessionToken`.
 Verify access with `aws sts get-caller-identity`, never `aws-sso process`. If
 credentials do land in output, say so without repeating them and run
 `aws-sso-auto logout` to invalidate them.
@@ -118,3 +141,8 @@ credentials do land in output, say so without repeating them and run
 - **PKCE / browser errors** — a headless box can't use PKCE or `open` URL actions;
   the provisioned config already uses `device_code` + `printurl`. Read
   `~/.config/aws-sso/config.yaml` to see the active settings.
+- **`login` fails with "SSO identity mismatch" but the new role is expected** — a
+  legitimate role/account change outran the allowlist. Update `accounts.yaml` in the
+  overlay via `dotfiles-provisioning`, re-provision, then re-run `aws-sso-auto login`.
+  (If the extra role was **not** expected, the wrong SSO user approved — that's the
+  identity guard doing its job; don't widen the allowlist.)
