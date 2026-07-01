@@ -7,5 +7,5 @@
        tree always stands alone. The same private dir feeds Hermes'
        ~/.hermes/skills/devops/ symlink — one copy, no drift. Robot-only: gated to
        clawbots in .chezmoiignore. */ -}}
-{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "ai" "skills" "app-log-investigation" -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "ai" "skills" "app-log-investigation" -}}
 {{- if stat $src }}{{ $src }}{{ end -}}

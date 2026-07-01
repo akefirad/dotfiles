@@ -7,5 +7,5 @@
        silently when the overlay is absent, so the public tree always stands alone.
        Not bundled in the skill — it's shared, and referenced by path. Robot-only:
        gated to clawbots in .chezmoiignore alongside the skills it serves. */ -}}
-{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "config" "ai" "references" "aws-architecture.md" -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "ai" "references" "aws-architecture.md" -}}
 {{- if stat $src }}{{ $src }}{{ end -}}
