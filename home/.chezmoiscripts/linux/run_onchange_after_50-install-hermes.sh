@@ -116,6 +116,18 @@ install_hermes() {
     echo "⚠️  hermes: mise not at $mise; installer will fetch its own Node." >&2
   fi
 
+  # Clawbot rootfs is EPHEMERAL: `docker compose up --build` recreates the
+  # container and discards the installer's root/FHS target (/usr/local/lib +
+  # /usr/local/bin) — only the /root home volume survives, so hermes vanishes on
+  # every rebuild. Pin the install under $HOME/.hermes (on the volume): with
+  # HERMES_INSTALL_DIR set the installer treats the layout as explicit, so the
+  # command link lands in ~/.local/bin and uv python defaults to
+  # ~/.local/share/uv — all on the volume. Everything here runs as root, so the
+  # FHS layout's only benefit (world-readable venv for non-root callers) buys us
+  # nothing. Non-clawbot boxes keep the installer's default persistent layout.
+  if [ "${CLAWBOT:-0}" = "1" ]; then
+    export HERMES_INSTALL_DIR="$HOME/.hermes/hermes-agent"
+  fi
   echo "🤖 Installing Hermes (pinned ${HERMES_COMMIT:0:12})…"
   curl -fsSL https://hermes-agent.nousresearch.com/install.sh \
     | bash -s -- --commit "$HERMES_COMMIT" --non-interactive --skip-setup
