@@ -106,7 +106,7 @@ is not enough; confirm it actually loads.
 This skill is the worked example of multi-consumer delivery:
 - **Canonical** files live at `~/.dotfiles/ai/skills/<name>/` — at the repo root,
   *outside* `home/`, so chezmoi doesn't manage them; they're just real files present
-  wherever the repo is cloned. Every skill (aws-sso, dotfiles-provisioning, …) lives
+  wherever the repo is cloned. Every skill (dotfiles-provisioning, …) lives
   here, so there's one home and one copy.
 - **`.agents/` compat:** a committed relative symlink `.agents/skills/<name>` →
   `../../ai/skills/<name>`, so anything that scans the conventional `.agents/skills/`
