@@ -2,6 +2,6 @@
        load path (~/.hermes/skills/devops/). The skill lives at the repo root in
        ai/ (outside the chezmoi source tree), so it's always present wherever the
        repo is cloned — no stat guard needed, unlike the private-overlay symlinks.
-       Same repo-root ai/ source as the aws-sso symlink, so all canonical skills
-       share one home. sourceDir is ~/.dotfiles/home, so ".." is the repo root. */ -}}
+       All canonical (public repo-root ai/) skills share this one home. sourceDir is
+       ~/.dotfiles/home, so ".." is the repo root. */ -}}
 {{- joinPath .chezmoi.sourceDir ".." "ai" "skills" "dotfiles-provisioning" -}}

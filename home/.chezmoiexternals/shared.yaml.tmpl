@@ -76,11 +76,6 @@
   executable: true
   path: terraform
 
-.local/bin/aws-sso:
-  type: file
-  url: {{ .tools.awsSso.repo }}/releases/download/v{{ .tools.awsSso.version }}/aws-sso-{{ .tools.awsSso.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
-  executable: true
-
 .local/bin/glow:
   type: archive-file
   url: {{ .tools.glow.repo }}/releases/download/v{{ .tools.glow.version }}/glow_{{ .tools.glow.version }}_{{ .archiveNameGlow }}.tar.gz
@@ -89,6 +84,12 @@
 
 {{ if not .clawbot -}}
 # ── PERSONAL ONLY ─────────────────────────────────────────────────────────────
+
+# aws-sso-cli — for interactive human SSO login on personal machines. No Clawbots!
+.local/bin/aws-sso:
+  type: file
+  url: {{ .tools.awsSso.repo }}/releases/download/v{{ .tools.awsSso.version }}/aws-sso-{{ .tools.awsSso.version }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+  executable: true
 
 # oh-my-zsh + prompt/plugins for the interactive zsh setup.
 .config/zsh/ohmyzsh:
