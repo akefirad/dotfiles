@@ -69,6 +69,7 @@ casks=(
   ghostty
   google-chrome
   hammerspoon
+  handy
   jetbrains-toolbox
   lapce
   meetingbar
