@@ -1,8 +1,7 @@
 {
 	"name": "Ubuntu",
 	"image": "mcr.microsoft.com/devcontainers/base:noble",
-	// "features": {},
-	"postCreateCommand": "git clone https://github.com/akefirad/dotfiles.git ~/.dotfiles && ~/.dotfiles/install.sh",
+	"postCreateCommand": "${containerWorkspaceFolder}/install.sh",
 	"customizations": {
 		"vscode": {
 			"settings": {
@@ -14,5 +13,4 @@
 		"DEVCONTAINER": "1",
 		"ZDOTDIR": "/home/vscode/.config/zsh"
 	}
-	// "remoteUser": "root"
 }
