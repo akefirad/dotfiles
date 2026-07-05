@@ -1,0 +1,15 @@
+{{- /* Clawbot-only symlink of ~/.kube/config -> the private overlay's static
+       kubeconfig. The caged agent's kubectl targets the real EKS API-server host;
+       the clawpatrol gateway MITMs it and injects the `k8s-aws-v1.` bearer minted
+       from the operator's AWS SSO session (aws_sso_eks_credential; see
+       private/clawtilla/gateway.hcl). The overlay kubeconfig carries NO exec block
+       and NO CA data — kubectl sends no auth (the gateway injects it) and trusts
+       the gateway root CA via the system trust store.
+
+       `server` identifies the account/cluster, so the kubeconfig lives in the
+       private overlay, never the public repo — same idiom as aws/credentials.
+       stat-guarded: the public repo stands alone, a human box (whose overlay
+       carries no such file) keeps its real ~/.kube/config untouched, and on a
+       clawbot the overlay supplies the file and this symlink resolves. */ -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "kube" "config" -}}
+{{- if stat $src }}{{ $src }}{{ end -}}
