@@ -7,7 +7,9 @@
 # Idempotent and non-interactive-safe: on a TTY it prompts for git identity, whether
 # to clone the private overlay, the Powerlevel10k repo, and which optional tools to install;
 # in CI/containers it takes derived defaults (honoring GIT_AUTHOR_NAME / GIT_AUTHOR_EMAIL
-# and the INSTALL_* env), skipping the private clone unless PRIVATE_GH_TOKEN is set.
+# and the INSTALL_* env), skipping the private clone unless PRIVATE_GH_TOKEN is set — or
+# it's a clawbot ($CLAWBOT), where the clawtilla gateway injects the real credential and
+# the clone proceeds with a placeholder token.
 #
 # Re-run to reconfigure the optional tools (INSTALL_* env or the prompt); changing one
 # clears chezmoi's run-state cache so the run_onchange installers re-fire — with a
@@ -39,9 +41,10 @@ ensure_chezmoi() {
 # repo's origin: same host/owner, repo name with a leading dot (dotfiles -> .dotfiles).
 # The token is used only in-process — never written to disk, the clone's .git/config,
 # the URL, shell history, or visible in `ps` (the helper holds a literal $TOKEN; git
-# expands it at runtime). Skipped when there's no origin, no token, or it's already
-# cloned. (Not gated on clawbots: the overlay holds no secrets, and the non-interactive
-# build path already skips it for lack of a token.)
+# expands it at runtime). Skipped when there's no origin, or it's already cloned, or
+# there's no token — EXCEPT on a clawbot ($CLAWBOT set): there the real credential is
+# injected by the clawtilla gateway, so a blank token becomes a placeholder (see below)
+# instead of a skip, and the clone proceeds unchanged.
 clone_private() {
   origin=$(git -C "$script_dir" remote get-url origin 2>/dev/null || true)
   [ -n "$origin" ] || { echo "private: no origin remote; skipping." >&2; return 0; }
@@ -61,21 +64,26 @@ clone_private() {
   dest="$script_dir/private"
   [ -e "$dest/.git" ] && { echo "private: already present at $dest." >&2; return 0; }
 
-  # Token from $PRIVATE_GH_TOKEN, else prompt on a TTY (echo off); skip otherwise.
+  # Token from $PRIVATE_GH_TOKEN, else prompt on a TTY (echo off).
   token="${PRIVATE_GH_TOKEN:-}"
-  if [ -z "$token" ]; then
-    if [ -t 0 ]; then
-      printf 'Clone private overlay %s ? token (blank to skip): ' "$priv_url" >&2
-      stty -echo 2>/dev/null || true
-      IFS= read -r token || true
-      stty echo 2>/dev/null || true
-      printf '\n' >&2
-    else
-      echo "private: no token, non-interactive; skipping ($priv_url)." >&2
-      return 0
-    fi
+  if [ -z "$token" ] && [ -t 0 ]; then
+    printf 'Clone private overlay %s ? token (blank to skip): ' "$priv_url" >&2
+    stty -echo 2>/dev/null || true
+    IFS= read -r token || true
+    stty echo 2>/dev/null || true
+    printf '\n' >&2
   fi
-  [ -n "$token" ] || { echo "private: skipped." >&2; return 0; }
+
+  # On a clawbot the agent never holds the real credential: the clawtilla gateway injects
+  # it into the request (overwriting any client-supplied Authorization). So a blank token
+  # here becomes a placeholder — the clone command below is unchanged; git just needs to
+  # emit *some* Authorization header for the gateway to overwrite. Its value is irrelevant
+  # and it never leaves the cage. Off a clawbot, a blank token still means skip.
+  if [ -z "$token" ] && [ -n "${CLAWBOT:-}" ]; then
+    echo "private: no token; CLAWBOT set — using a placeholder (gateway injects the real credential)." >&2
+    token="x-access-token-gateway-injected"
+  fi
+  [ -n "$token" ] || { echo "private: no token; skipping ($priv_url)." >&2; return 0; }
 
   echo "private: cloning $priv_url -> $dest" >&2
   # shellcheck disable=SC2016
