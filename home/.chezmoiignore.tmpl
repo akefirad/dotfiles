@@ -45,12 +45,17 @@ Library/**
        gateway-configured AWS credentials); both runtimes' symlinks resolve to the
        same private-overlay source, and its shared aws-architecture.md reference
        (surfaced at ~/.config/ai/references/) serves only that skill, so it's gated too.
+       .aws/config is clawbot-only (per-profile regions for the placeholder profiles;
+       see dot_aws/symlink_config.tmpl). On a human box ~/.aws/config is owned by
+       aws-sso, so it must NOT be chezmoi-managed — otherwise the overlay-less symlink
+       renders empty and chezmoi would DELETE the real file.
        NB: keep these as consecutive bare lines — an inline {{ "{{- … -}}" }}
        comment between them trims the newlines and glues two patterns into one. */ -}}
 .config/gh/hosts.yml
 .claude/skills/app-log-investigation
 .hermes/skills/devops/app-log-investigation
 .config/ai/references/aws-architecture.md
+.aws/config
 {{ end -}}
 
 {{ if ne .chezmoi.os "darwin" -}}
