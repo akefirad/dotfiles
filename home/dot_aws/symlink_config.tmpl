@@ -1,0 +1,14 @@
+{{- /* Clawbot-only ~/.aws/config: per-profile regions for the caged agent. The
+       placeholder profiles seeded in ~/.aws/credentials carry no region, and a
+       named profile does NOT inherit region from [default], so `aws --profile
+       develop …` fails with NoRegion unless a matching [profile develop] with a
+       region exists. The profile names mirror the accounts, so — like the
+       credentials file — the content lives in the private overlay, never the
+       public repo.
+
+       stat-guarded, so the public repo stands alone and a human box keeps its
+       own aws-sso-managed ~/.aws/config untouched (its overlay carries no such
+       file, so this symlink dangles); on a clawbot the overlay supplies the file
+       and this symlink resolves. Same idiom as symlink_credentials.tmpl. */ -}}
+{{- $src := joinPath .chezmoi.sourceDir ".." "private" "home" "aws" "config" -}}
+{{- if stat $src }}{{ $src }}{{ end -}}
