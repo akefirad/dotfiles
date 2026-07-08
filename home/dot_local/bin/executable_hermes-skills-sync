@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# hermes-skills-sync — mirror this clawbot's ~/.hermes/skills into the private
+# overlay repo and push, so agent-authored skills survive volume loss / fresh
+# provisioning and are visible in git. Clawbot-only; a harmless no-op elsewhere.
+#
+# COPY-MIRROR, not the live dir: we deliberately do NOT make ~/.hermes/skills a
+# git working tree — Hermes writes there constantly (skill_manage), and git
+# operations must never race that I/O. Instead we snapshot it into the overlay.
+#
+# Hermes always creates new skills under ~/.hermes/skills/ (get_skills_dir();
+# skills.external_dirs are read-only load paths, never creation targets), so the
+# live dir is the single source of truth to mirror.
+#
+# SYMLINKS ARE SKIPPED: the curated skills we provision (devops/*) are delivered
+# as symlinks into their own already-tracked repos. Mirroring them would only
+# duplicate tracked content, so we copy real files and drop symlinks.
+#
+# --loop: sync forever on an interval (used by the Hermes gateway container's
+# supervisor). Default: a single pass. Interval via HERMES_SKILLS_SYNC_INTERVAL
+# (seconds, default 900).
+
+SRC="$HOME/.hermes/skills"
+OVERLAY="$HOME/.dotfiles/private"        # the clawbot overlay clone (…/.dotfiles)
+DEST_REL="home/hermes/skills"
+INTERVAL="${HERMES_SKILLS_SYNC_INTERVAL:-900}"
+
+log() { printf 'hermes-skills-sync: %s\n' "$1" >&2; }
+
+sync_once() {
+  # Only meaningful on a clawbot with the overlay cloned and skills present.
+  [ "${CLAWBOT:-0}" = "1" ] || { log "not a clawbot; skipping."; return 0; }
+  [ -d "$SRC" ] || return 0
+  [ -d "$OVERLAY/.git" ] || { log "overlay not present at $OVERLAY; skipping."; return 0; }
+
+  # Mirror ONLY onto the overlay's default branch. A clawbot can be temporarily
+  # parked on a feature branch (the provisioning workflow), and we must not mix
+  # skill commits into that code PR — nor push them onto a branch a fresh provision
+  # won't read back. Skills stay safe on the volume meanwhile and sync once the box
+  # reconciles to the default branch.
+  default_branch=$(git -C "$OVERLAY" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
+  default_branch=${default_branch:-main}
+  current_branch=$(git -C "$OVERLAY" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')
+  if [ "$current_branch" != "$default_branch" ]; then
+    log "overlay on '$current_branch' (not '$default_branch'); skipping mirror."
+    return 0
+  fi
+
+  dest="$OVERLAY/$DEST_REL"
+  mkdir -p "$dest"
+
+  # Faithful mirror: clear the tracked tree (keep the .gitkeep placeholder so the
+  # dir survives even when empty), copy the live skills preserving symlinks, then
+  # drop symlinks and pycache so only real content lands.
+  find "$dest" -mindepth 1 -maxdepth 1 ! -name .gitkeep -exec rm -rf {} +
+  cp -R "$SRC/." "$dest/" 2>/dev/null || true
+  find "$dest" -type l -delete
+  find "$dest" -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
+
+  # Stage only our subtree so we never sweep unrelated overlay changes.
+  git -C "$OVERLAY" add -A -- "$DEST_REL"
+  if git -C "$OVERLAY" diff --cached --quiet -- "$DEST_REL"; then
+    return 0   # nothing changed
+  fi
+
+  git -C "$OVERLAY" \
+    -c user.name="hermes-skills-sync" \
+    -c user.email="hermes-skills-sync@clawbot.local" \
+    commit -q -m "GH-0 sync agent skills ($(date -u +%Y-%m-%dT%H:%M:%SZ))" \
+    -- "$DEST_REL"
+
+  if git -C "$OVERLAY" push -q origin HEAD; then
+    log "pushed skills snapshot."
+  else
+    log "push failed (will retry next pass)."
+  fi
+}
+
+if [ "${1:-}" = "--loop" ]; then
+  while :; do sync_once || true; sleep "$INTERVAL"; done
+else
+  sync_once
+fi
