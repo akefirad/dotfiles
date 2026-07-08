@@ -80,6 +80,7 @@ casks=(
   stolendata-mpv
   telegram
   the-unarchiver
+  tigervnc
   visual-studio-code
   vlc
   voiceink
