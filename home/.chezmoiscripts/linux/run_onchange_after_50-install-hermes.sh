@@ -233,6 +233,27 @@ if [ "${CLAWBOT:-0}" = "1" ]; then
   chmod 600 "$env_file" 2>/dev/null || true
 fi
 
+# Restore agent-authored skills from the private-overlay snapshot (durability
+# across a fresh box / destroyed home volume). The clawbot mirrors ~/.hermes/skills
+# into the overlay's home/hermes/skills and pushes on an interval (see
+# ~/.local/bin/hermes-skills-sync, looped by the Hermes gateway container); here we
+# copy it back BEFORE the agent runs. NON-CLOBBERING (cp -n): the main apply phase
+# already delivered the curated skill symlinks (private_dot_hermes/private_skills/…)
+# and Hermes' own sync will (re)seed bundled skills, so we only fill in what's
+# absent — never overwrite a live symlink or a fresher bundled copy. The overlay is
+# cloned by install.sh's clone_private BEFORE this apply, so the snapshot is present
+# on a provisioned clawbot; when it isn't (first box ever, overlay absent), this is
+# a silent no-op and the first sync pass seeds the snapshot instead.
+if [ "${CLAWBOT:-0}" = "1" ]; then
+  snapshot="$HOME/.dotfiles/private/home/hermes/skills"
+  live="$HOME/.hermes/skills"
+  if [ -d "$snapshot" ]; then
+    mkdir -p "$live"
+    cp -Rn "$snapshot/." "$live/" 2>/dev/null || true
+    echo "✅ hermes: restored agent skills from overlay snapshot (non-clobbering)."
+  fi
+fi
+
 # The interactive setup wizard is skipped (--skip-setup); point the user at it.
 if command -v hermes >/dev/null 2>&1; then
   hermes --version || true

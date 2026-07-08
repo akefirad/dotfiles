@@ -58,6 +58,14 @@ Library/**
 .aws/config
 {{ end -}}
 
+{{ if not (and .clawbot (eq (dig "install" "hermes" "0" .) "1")) -}}
+{{- /* hermes-skills-sync mirrors ~/.hermes/skills into the private overlay and
+       pushes via the gateway. It only makes sense on a clawbot that actually runs
+       Hermes, so ship it solely when both hold (clawbot ∧ INSTALL_HERMES) — the
+       same gate as the Hermes seeders/installer. */ -}}
+.local/bin/hermes-skills-sync
+{{ end -}}
+
 {{ if ne .chezmoi.os "darwin" -}}
 {{- /* ── not macOS ─────────────────────────────────────────────────────────── */ -}}
 .chezmoiexternals/darwin.*
