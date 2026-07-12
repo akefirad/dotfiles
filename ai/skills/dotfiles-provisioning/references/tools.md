@@ -74,10 +74,39 @@ neither a release binary nor a package fits. Models:
 - **Pin the version** in the script; bumping it changes the file hash and
   re-triggers `run_onchange`.
 - **Install-if-missing / idempotent:** no-op when the pinned version is present.
-- Install into `~/.local` (sudo-free); fall back to root only as a last resort.
+- Install into `~/.local` (sudo-free); fall back to root only as a last resort
+  (see "Root / system installs" below).
 - Note: `run_onchange_` keys on the script's *contents* hash. Flipping only a
   `scriptEnv` flag won't re-run it; force with
   `chezmoi state delete-bucket --bucket=entryState && chezmoi apply`.
+
+## Root / system installs (sudo)
+
+Prefer a sudo-free tier above; only touch the system when nothing else fits. When
+a script *must* run a privileged command (`apt-get`, writing under `/usr`, `/etc`),
+**never assume root** — copy the guard idiom every apt script here already uses. It
+uses `sudo` only when not already root, and only when sudo is **passwordless**
+(`sudo -n`), so it never hangs on an interactive password prompt (there's no human
+on a clawbot):
+
+```sh
+if [ "$(id -u)" -eq 0 ]; then sudo=""
+elif command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then sudo="sudo"
+else echo "❌ need root or passwordless sudo." >&2; exit 1; fi
+$sudo apt-get update -qq
+$sudo apt-get install -y --no-install-recommends "${pkgs[@]}"
+```
+
+Then run every privileged command through `$sudo` (empty when already root). Pick
+the no-privilege branch by how essential the tool is:
+- **Base prerequisite the box can't work without** → hard-fail (`exit 1`), like
+  `00-install.sh` / `01-install-packages.sh`.
+- **Optional / nice-to-have** → warn and skip (`exit 0`), like `02-install-apps.sh`
+  and the hermes ffmpeg step (`sudo="-"` sentinel → skip that piece, continue).
+
+If *you're* the agent running the apply and the box has neither root nor
+passwordless sudo, don't try to work around it — the install can't complete here.
+Open the PR and hand the privileged run to the owner (SKILL.md Step 4).
 
 ## Vendored source (reference / building)
 
