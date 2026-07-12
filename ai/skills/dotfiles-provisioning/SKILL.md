@@ -79,7 +79,14 @@ the exact files to edit, and worked examples are in
      bespoke installer when a clean package exists.
    - **Tier 3 — vendor installer:** an official sudo-free install into a user
      prefix, when neither of the above fits.
-   - **Root/system install — last resort**, justified.
+   - **Root/system install — last resort**, justified. **Never assume you have
+     root.** Any script that touches the system must use `sudo` *only when needed
+     and only when it's passwordless* — the `id -u` / `sudo -n` guard idiom every
+     apt script here already uses (see [references/tools.md](references/tools.md)).
+     If the box has neither root nor passwordless sudo, **do not try to force the
+     install** — an interactive password prompt has no human on a clawbot. Open the
+     PR and ask the owner to run `chezmoi apply` (or the privileged step)
+     themselves; see Step 4.
 
 ## Step 2′ — Placement ladder (config & artifacts)
 
@@ -162,6 +169,11 @@ content.
      it's risky, irreversible, or hard to recover from, **don't self-apply** — send
      the PR over Telegram and wait for confirmation before applying. When in doubt,
      wait.
+   - **Needs root you don't have?** A privileged (root/system) install can only be
+     self-applied where you have root or *passwordless* sudo. If the box has
+     neither, you **can't** apply it — don't attempt to force it. Push the PR and
+     ask the owner to run `chezmoi apply` (or the privileged step) themselves, same
+     as the "wait" path above.
    - **Telegram works the same way — don't assume it's unavailable.** Not seeing it
      in your session is *not* evidence it's missing; on a clawbot it's typically
      wired up and can send. **Actually attempt the send** (or verify the channel)
