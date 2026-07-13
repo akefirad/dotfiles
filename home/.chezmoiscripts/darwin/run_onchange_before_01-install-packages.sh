@@ -67,6 +67,7 @@ casks=(
   fork
   freelens
   ghostty
+  gitbutler
   google-chrome
   hammerspoon
   handy
