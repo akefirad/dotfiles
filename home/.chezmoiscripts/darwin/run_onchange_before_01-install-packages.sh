@@ -78,6 +78,7 @@ casks=(
   orka-desktop
   raycast
   slack
+  sourcetree
   stolendata-mpv
   telegram
   the-unarchiver
